@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 const DATA_DIR = path.join(process.cwd(), "data");
 const cache = {};
 
-function read(f, fallback) {
+export function read(f, fallback) {
   if (cache[f] !== undefined) return cache[f];
   const fp = path.join(DATA_DIR, f);
   if (!fs.existsSync(fp)) return fallback;
@@ -14,7 +14,7 @@ function read(f, fallback) {
   catch { return fallback; }
 }
 
-function write(f, data) {
+export function write(f, data) {
   cache[f] = data;
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(path.join(DATA_DIR, f), JSON.stringify(data, null, 2));

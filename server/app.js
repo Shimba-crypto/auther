@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createHmac, randomBytes } from "crypto";
-import { listUsers, createUser, verifyCredentials, issueToken, verifyToken, revokeToken, publicUser, findUserByEmail, findUser, initStorage, read, write } from "./storage.js";
+import { listUsers, createUser, verifyCredentials, issueToken, verifyToken, revokeToken, publicUser, findUserByEmail, findUser, initStorage } from "./storage.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST = path.join(__dirname, "..", "dist");
