@@ -19,17 +19,50 @@ export default function Register({ onLogin }: { onLogin: (t: string) => void }) 
   }
 
   return (
-    <div className="max-w-sm mx-auto mt-16">
-      <h1 className="text-2xl font-semibold mb-1">Create account</h1>
-      <p className="text-sm text-gray-500 mb-6">One login for all ZamAI apps.</p>
-      <form onSubmit={submit} className="space-y-3">
-        <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your name" className="w-full border rounded-md px-3 py-2 text-sm" />
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" className="w-full border rounded-md px-3 py-2 text-sm" />
-        <input type="password" value={pass} onChange={(e) => setPass(e.target.value)} required minLength={6} placeholder="Password (6+ chars)" className="w-full border rounded-md px-3 py-2 text-sm" />
-        {err && <p className="text-red-600 text-sm">{err}</p>}
-        <button disabled={loading} className="w-full bg-gray-900 text-white text-sm font-medium py-2 rounded-md hover:bg-gray-700 disabled:opacity-50">{loading ? "..." : "Sign up"}</button>
-      </form>
-      <p className="text-sm text-gray-500 mt-4 text-center">Have an account? <Link to="/login" className="text-gray-900 font-medium hover:underline">Log in</Link></p>
+    <div className="max-w-md mx-auto mt-10 md:mt-20">
+      <div className="glass-strong rounded-2xl p-8 shadow-2xl shadow-black/40">
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center text-xl shadow-lg shadow-purple-500/30 animate-floaty">
+            ✨
+          </div>
+          <h1 className="text-2xl font-bold mt-4 text-white">Create your account</h1>
+          <p className="text-sm text-slate-400 mt-1">One login for all ZamAI apps</p>
+        </div>
+
+        <form onSubmit={submit} className="space-y-4">
+          <div>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Your name</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Jane Doe"
+              className="input-dark w-full rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500" />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com"
+              className="input-dark w-full rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500" />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Password</label>
+            <input type="password" value={pass} onChange={(e) => setPass(e.target.value)} required minLength={6} placeholder="6+ characters"
+              className="input-dark w-full rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500" />
+            <p className="text-[11px] text-slate-500 mt-1.5">Must be at least 6 characters</p>
+          </div>
+
+          {err && (
+            <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5 animate-fade-in">
+              {err}
+            </p>
+          )}
+
+          <button disabled={loading} className="btn-primary w-full text-white text-sm font-semibold py-3 rounded-xl">
+            {loading ? "Creating account…" : "Sign up"}
+          </button>
+        </form>
+
+        <p className="text-sm text-slate-500 mt-6 text-center">
+          Already have an account?{" "}
+          <Link to="/login" className="text-indigo-300 font-medium hover:text-indigo-200 hover:underline">Log in</Link>
+        </p>
+      </div>
     </div>
   );
 }
