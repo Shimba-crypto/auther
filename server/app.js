@@ -119,6 +119,7 @@ const TRUSTED_APPS = {
   shimsearch: "https://shimsearch.onrender.com",
   shimbadata: "https://shimbadata.onrender.com",
   nexaspay: "https://nexas-pay.onrender.com",
+  cooperweb: "https://cooper-web.onrender.com",
 };
 
 app.get("/sso/authorize", (req, res) => {
