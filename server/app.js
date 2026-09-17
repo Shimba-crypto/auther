@@ -120,6 +120,9 @@ const TRUSTED_APPS = {
   shimbadata: "https://shimbadata.onrender.com",
   nexaspay: "https://nexas-pay.onrender.com",
   cooperweb: "https://cooper-web.onrender.com",
+  shifu: "https://shifu-api-production.up.railway.app",
+  "shifu-api": "https://shifu-api-production.up.railway.app",
+  shifucode: "https://shifu-api.up.railway.app",
 };
 
 app.get("/sso/authorize", (req, res) => {
