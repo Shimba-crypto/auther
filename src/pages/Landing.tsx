@@ -51,7 +51,7 @@ export default function Landing() {
             href={shifuPromo.shifuLoginUrl}
             className="mt-6 inline-flex items-center gap-2 text-xs font-medium px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 text-emerald-300 hover:border-emerald-500/40 transition animate-fade-in"
           >
-            🎓 {shifuPromo.headline} — Sign in with Auther and get 1B tokens (1,000,000 credits) free
+            🎓 {shifuPromo.headline} — Sign in with Auther and get 10M tokens (10,000 credits) free
           </a>
         )}
         

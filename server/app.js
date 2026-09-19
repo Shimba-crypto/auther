@@ -234,8 +234,8 @@ app.get("/api/promo/shifu-bonus", (req, res) => {
   const active = process.env.SHIFU_BONUS_ACTIVE !== "false";
   res.json({
     active: active,
-    headline: "1B token welcome bonus",
-    detail: "Sign in with Auther and Shifu adds 1B tokens (1,000,000 credits) to your account — free, one time.",
+    headline: "10M token welcome bonus",
+    detail: "Sign in with Auther and Shifu adds 10M tokens (10,000 credits) to your account — free, one time.",
     shifuLoginUrl: "https://shifu-api-production.up.railway.app/api/auth/auther/login"
   });
 });

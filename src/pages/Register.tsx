@@ -80,7 +80,7 @@ export default function Register({ onLogin }: { onLogin: (t: string) => void }) 
               ✕
             </button>
             <p className="text-xs text-emerald-300 font-medium leading-relaxed pr-4">
-              🎓 Study with Shifu — sign in with Auther and get a 1B token welcome bonus (free), plus $1 starter credits.
+              🎓 Study with Shifu — sign in with Auther and get a 10M token welcome bonus (10,000 credits, free), plus $1 starter credits.
             </p>
           </div>
         )}
