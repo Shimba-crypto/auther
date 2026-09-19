@@ -19,7 +19,7 @@ if (fs.existsSync(envPath)) {
 const PORT = process.env.PORT || 3001;
 
 async function boot() {
-  initStorage();
+  await initStorage();
   app.listen(PORT, () => console.log(`Auther running on port ${PORT}`));
 }
 
