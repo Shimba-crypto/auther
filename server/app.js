@@ -227,6 +227,18 @@ app.post("/sso/exchange", (req, res) => {
   res.json({ ok: true, user: { email: user.email, name: user.name } });
 });
 
+// Promo: Shifu bonus banner endpoint (configurable without redeploy)
+app.get("/api/promo/shifu-bonus", (req, res) => {
+  // Check environment variable to allow disabling the promo without code changes
+  const active = process.env.SHIFU_BONUS_ACTIVE !== "false";
+  res.json({
+    active: active,
+    headline: "1B token welcome bonus",
+    detail: "Sign in with Auther and Shifu adds 1B tokens (1,000,000 credits) to your account — free, one time.",
+    shifuLoginUrl: "https://shifu-api-production.up.railway.app/api/auth/auther/login"
+  });
+});
+
 // Frontend
 app.use(express.static(DIST));
 app.get("*", (req, res, next) => {
