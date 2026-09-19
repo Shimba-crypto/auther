@@ -242,11 +242,33 @@ app.get("/api/promo/shifu-bonus", (req, res) => {
 
 // Frontend - only serve static files if dist directory exists
 if (existsSync(DIST)) {
-  app.use(express.static(DIST));
+  // Hashed Vite assets are immutable — cache hard; HTML must always revalidate
+  // so a redeploy is picked up immediately (prevents stale-HTML/asset-hash mismatch)
+  app.use("/assets", express.static(path.join(DIST, "assets"), {
+    setHeaders: (res) => res.setHeader("Cache-Control", "public, max-age=31536000, immutable"),
+  }));
+  app.use(express.static(DIST, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith("index.html") || filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+      }
+    },
+  }));
   app.get("*", (req, res, next) => {
     if (req.path.startsWith("/api") || req.path.startsWith("/sso")) return next();
+    // Asset-like requests (hashed bundles, files with extensions) must 404,
+    // never fall back to index.html — HTML served as CSS/JS causes MIME errors
+    const isAssetLike = req.path.startsWith("/assets/") || /\.[a-zA-Z0-9]+$/.test(req.path);
+    if (isAssetLike) return res.status(404).json({ error: "not found" });
+    res.setHeader("Cache-Control", "no-cache");
     res.sendFile(path.join(DIST, "index.html"));
   });
 }
+
+// JSON error handler — any unexpected throw returns clean JSON, not an HTML stack
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err.message);
+  res.status(500).json({ error: "internal error" });
+});
 
 export default app;
