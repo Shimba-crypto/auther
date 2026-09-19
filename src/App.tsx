@@ -11,19 +11,43 @@ import NotFound from "./pages/NotFound";
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem("auth-token") || "");
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("auth-token", token);
-      fetch("/api/auth/me", { headers: { "X-Auth-Token": token } })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((d) => setUser(d?.user || null))
-        .catch(() => setUser(null));
-    } else {
-      localStorage.removeItem("auth-token");
-      fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then((d) => setUser(d?.user || null)).catch(() => setUser(null));
-    }
+    const fetchUser = async () => {
+      try {
+        if (token) {
+          localStorage.setItem("auth-token", token);
+          const r = await fetch("/api/auth/me", { headers: { "X-Auth-Token": token } });
+          const d = r.ok ? await r.json() : null;
+          setUser(d?.user || null);
+        } else {
+          localStorage.removeItem("auth-token");
+          const r = await fetch("/api/auth/me");
+          const d = r.ok ? await r.json() : null;
+          setUser(d?.user || null);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
   }, [token]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0f1e]">
+        <div className="text-center">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg shadow-indigo-500/30 animate-spin">
+            🔑
+          </div>
+          <p className="text-slate-400 mt-4 text-sm font-medium animate-pulse">Loading Auther...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Routes>
