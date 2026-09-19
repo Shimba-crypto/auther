@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { usePageTitle } from "../lib/usePageTitle";
+
+interface ShifuBonusPromo {
+  active: boolean;
+  headline: string;
+  detail: string;
+  shifuLoginUrl: string;
+}
 
 export default function Register({ onLogin }: { onLogin: (t: string) => void }) {
   usePageTitle("Sign up");
@@ -12,6 +19,19 @@ export default function Register({ onLogin }: { onLogin: (t: string) => void }) 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [shifuPromo, setShifuPromo] = useState<ShifuBonusPromo | null>(null);
+  const [promoDismissed, setPromoDismissed] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/promo/shifu-bonus")
+      .then((r) => r.json())
+      .then((data: ShifuBonusPromo) => {
+        if (data.active) {
+          setShifuPromo(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   function validatePassword(password: string): string | null {
     if (password.length < 8) {
@@ -50,6 +70,21 @@ export default function Register({ onLogin }: { onLogin: (t: string) => void }) 
   return (
     <div className="max-w-md mx-auto mt-10 md:mt-20">
       <div className="glass-strong rounded-2xl p-8 shadow-2xl shadow-black/40">
+        {shifuPromo && !promoDismissed && (
+          <div className="mb-6 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 p-4 relative animate-fade-in">
+            <button 
+              onClick={() => setPromoDismissed(true)}
+              className="absolute top-2 right-2 text-slate-400 hover:text-slate-200 transition text-xs"
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+            <p className="text-xs text-emerald-300 font-medium leading-relaxed pr-4">
+              🎓 Study with Shifu — sign in with Auther and get a 1B token welcome bonus (free), plus $1 starter credits.
+            </p>
+          </div>
+        )}
+        
         <div className="text-center mb-8">
           <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center text-xl shadow-lg shadow-purple-500/30 animate-floaty">
             ✨

@@ -1,5 +1,13 @@
 import { Link } from "react-router-dom";
 import { usePageTitle } from "../lib/usePageTitle";
+import { useEffect, useState } from "react";
+
+interface ShifuBonusPromo {
+  active: boolean;
+  headline: string;
+  detail: string;
+  shifuLoginUrl: string;
+}
 
 const FEATURES = [
   { i: "🔐", t: "Secure", d: "bcrypt hashing, JWT tokens, httpOnly cookies" },
@@ -17,6 +25,19 @@ const APPS = [
 
 export default function Landing() {
   usePageTitle("");
+  const [shifuPromo, setShifuPromo] = useState<ShifuBonusPromo | null>(null);
+
+  useEffect(() => {
+    fetch("/api/promo/shifu-bonus")
+      .then((r) => r.json())
+      .then((data: ShifuBonusPromo) => {
+        if (data.active) {
+          setShifuPromo(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="max-w-5xl mx-auto">
       <section className="text-center pt-16 md:pt-24 pb-14">
@@ -24,6 +45,16 @@ export default function Landing() {
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse-glow" />
           One account for the entire ZamAI ecosystem
         </span>
+        
+        {shifuPromo && (
+          <a 
+            href={shifuPromo.shifuLoginUrl}
+            className="mt-6 inline-flex items-center gap-2 text-xs font-medium px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 text-emerald-300 hover:border-emerald-500/40 transition animate-fade-in"
+          >
+            🎓 {shifuPromo.headline} — Sign in with Auther and get 1B tokens (1,000,000 credits) free
+          </a>
+        )}
+        
         <h1 className="mt-6 text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.05]">
           Sign in once.
           <br />
