@@ -27,10 +27,16 @@ export function findUserByEmail(email) { return listUsers().find((u) => u.email 
 export function createUser({ name, email, password, role = "user" }) {
   const users = listUsers();
   if (users.some((u) => u.email === email.toLowerCase())) return { error: "email taken" };
-  if (password.length < 6) return { error: "password too short" };
+  
+  // Stronger password validation on storage level
+  if (password.length < 8) return { error: "password must be at least 8 characters" };
+  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return { error: "password must contain letters and numbers" };
+  }
+  
   const user = {
     id: "usr_" + crypto.randomBytes(8).toString("hex"),
-    name, email: email.toLowerCase(), passwordHash: bcrypt.hashSync(password, 10),
+    name, email: email.toLowerCase(), passwordHash: bcrypt.hashSync(password, 12), // Increased salt rounds for better security
     role, active: true, createdAt: new Date().toISOString(),
   };
   users.push(user);

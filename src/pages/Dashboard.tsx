@@ -14,7 +14,9 @@ export default function Dashboard({ token, user }: { token: string; user: any })
 
   function enter(a: (typeof APPS)[number]) {
     setEntering(a.name);
-    window.location.href = `${a.url}/api/auth/sso?token=${token}`;
+    const ssoUrl = new URL(`${a.url}/api/auth/sso`);
+    ssoUrl.searchParams.set('token', token);
+    window.location.href = ssoUrl.toString();
   }
 
   return (
@@ -35,13 +37,20 @@ export default function Dashboard({ token, user }: { token: string; user: any })
       <div className="grid sm:grid-cols-2 gap-4">
         {APPS.map((a) => (
           <button key={a.name} onClick={() => enter(a)} disabled={entering === a.name}
-            className={`glass rounded-2xl p-5 text-left card-hover ${entering === a.name ? "opacity-60" : ""}`}>
+            className={`glass rounded-2xl p-5 text-left card-hover ${entering === a.name ? "opacity-60 cursor-not-allowed" : ""}`}>
             <div className="flex items-start justify-between">
               <span className={`w-12 h-12 rounded-xl bg-gradient-to-br ${a.grad} flex items-center justify-center text-2xl shadow-lg`}>
                 {a.emoji}
               </span>
               <span className="text-xs text-indigo-300 font-medium flex items-center gap-1">
-                {entering === a.name ? "Signing you in…" : "Sign in with Auther →"}
+                {entering === a.name ? (
+                  <>
+                    <span className="w-3 h-3 border-2 border-indigo-300/30 border-t-indigo-300 rounded-full animate-spin" />
+                    Signing you in…
+                  </>
+                ) : (
+                  "Sign in with Auther →"
+                )}
               </span>
             </div>
             <h3 className="font-bold text-lg mt-4 text-white">{a.name}</h3>

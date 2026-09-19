@@ -26,6 +26,9 @@ body {
 @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .animate-floaty { animation: floaty 5s ease-in-out infinite; }
 
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.animate-spin { animation: spin 1.5s linear infinite; }
+
 @keyframes pulse-glow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
 

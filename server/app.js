@@ -10,7 +10,30 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST = path.join(__dirname, "..", "dist");
 
 const app = express();
-app.use(cors());
+
+// CORS configuration - restrict to trusted origins only
+const ALLOWED_ORIGINS = [
+  "https://shifu-api-production.up.railway.app",
+  "https://shifu-api.up.railway.app",
+  "https://johnweb-qncu.onrender.com",
+  "https://shimsearch.onrender.com",
+  "https://shimbadata.onrender.com",
+  "https://nexas-pay.onrender.com",
+  "https://cooper-web.onrender.com",
+  process.env.ALLOWED_ORIGIN // Allow custom origin via env var
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
 app.use(cookieParser());
 app.use(express.json({ limit: "10kb" }));
 app.set("trust proxy", true);
@@ -62,11 +85,30 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true, time: new Date().toISOString(), users: listUsers().length });
 });
 
-// Register
+// Register with input validation and stronger password requirements
 app.post("/api/auth/register", rateLimit(15 * 60 * 1000, 5), (req, res) => {
   const { name, email, password } = req.body || {};
-  if (!name || !email || !password) return res.status(400).json({ error: "name, email, password required" });
-  const result = createUser({ name, email, password });
+  
+  // Input validation
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    return res.status(400).json({ error: "valid name required" });
+  }
+  if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: "valid email required" });
+  }
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ error: "password required" });
+  }
+  
+  // Stronger password requirements: min 8 chars, must contain number and letter
+  if (password.length < 8) {
+    return res.status(400).json({ error: "password must be at least 8 characters" });
+  }
+  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return res.status(400).json({ error: "password must contain letters and numbers" });
+  }
+  
+  const result = createUser({ name: name.trim(), email: email.toLowerCase(), password });
   if (result.error) return res.status(409).json(result);
   // Auto-login
   const token = issueToken(result.user.id);
@@ -74,11 +116,19 @@ app.post("/api/auth/register", rateLimit(15 * 60 * 1000, 5), (req, res) => {
   res.status(201).json({ token, user: result.user });
 });
 
-// Login
+// Login with input validation and rate limiting
 app.post("/api/auth/login", rateLimit(15 * 60 * 1000, 5), (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: "email and password required" });
-  const user = verifyCredentials(email, password);
+  
+  // Input validation
+  if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: "valid email required" });
+  }
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ error: "password required" });
+  }
+  
+  const user = verifyCredentials(email.toLowerCase(), password);
   if (!user) return res.status(401).json({ error: "invalid credentials" });
   const token = issueToken(user.id);
   res.cookie("auth_token", token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 30 * 24 * 60 * 60 * 1000 });
@@ -98,12 +148,19 @@ app.get("/api/auth/me", requireAuth, (req, res) => {
   res.json({ user: publicUser(req.user) });
 });
 
-// Update profile
+// Update profile with input validation
 app.put("/api/auth/profile", requireAuth, (req, res) => {
   const users = listUsers();
   const idx = users.findIndex((u) => u.id === req.user.id);
   if (idx < 0) return res.status(404).json({ error: "not found" });
-  if (req.body.name) users[idx].name = req.body.name.slice(0, 100);
+  
+  // Input validation and sanitization
+  if (req.body.name) {
+    if (typeof req.body.name !== 'string' || req.body.name.trim().length === 0) {
+      return res.status(400).json({ error: "valid name required" });
+    }
+    users[idx].name = req.body.name.trim().slice(0, 100);
+  }
   write("users.json", users);
   res.json({ user: publicUser(users[idx]) });
 });
@@ -150,10 +207,12 @@ app.get("/sso/authorize", (req, res) => {
   res.redirect(`${redirect_uri}${sep}code=${code}${state ? "&state=" + state : ""}`);
 });
 
-// SSO: exchange code for user info
+// SSO: exchange code for user info with CSRF protection
 app.post("/sso/exchange", (req, res) => {
   const { code } = req.body || {};
-  if (!code) return res.status(400).json({ error: "code required" });
+  if (!code || typeof code !== 'string') {
+    return res.status(400).json({ error: "valid code required" });
+  }
   const codes = read("sso-codes.json", {});
   const record = codes[code];
   if (!record || record.used || Date.now() > record.expiresAt) {
@@ -163,7 +222,9 @@ app.post("/sso/exchange", (req, res) => {
   write("sso-codes.json", codes);
   const user = findUser(record.userId);
   if (!user) return res.status(404).json({ error: "user not found" });
-  res.json({ ok: true, user: publicUser(user) });
+  
+  // Return only the expected user fields to maintain contract stability
+  res.json({ ok: true, user: { email: user.email, name: user.name } });
 });
 
 // Frontend

@@ -14,7 +14,9 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_EMAIL
-        value: admin@zamai.com
+        sync: false
       - key: ADMIN_PASSWORD
-        value: Admin2026!Secure
+        sync: false
+      - key: ALLOWED_ORIGIN
+        sync: false
     autoDeploy: true

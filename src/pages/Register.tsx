@@ -7,13 +7,42 @@ export default function Register({ onLogin }: { onLogin: (t: string) => void }) 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  function validatePassword(password: string): string | null {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters";
+    }
+    if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return "Password must contain both letters and numbers";
+    }
+    return null;
+  }
 
   async function submit(e: React.FormEvent) {
-    e.preventDefault(); setErr(""); setLoading(true);
+    e.preventDefault(); 
+    setErr("");
+    
+    // Validate password strength
+    const passwordError = validatePassword(pass);
+    if (passwordError) {
+      setErr(passwordError);
+      return;
+    }
+    
+    if (pass !== confirmPass) {
+      setErr("Passwords do not match");
+      return;
+    }
+    
+    setLoading(true);
     const r = await fetch("/api/auth/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, email, password: pass }) });
-    const d = await r.json(); setLoading(false);
+    const d = await r.json(); 
+    setLoading(false);
     if (d.token) { onLogin(d.token); window.location.href = "/dashboard"; }
     else setErr(d.error || "signup failed");
   }
@@ -42,9 +71,26 @@ export default function Register({ onLogin }: { onLogin: (t: string) => void }) 
           </div>
           <div>
             <label className="text-xs font-medium text-slate-400 mb-1.5 block">Password</label>
-            <input type="password" value={pass} onChange={(e) => setPass(e.target.value)} required minLength={6} placeholder="6+ characters"
-              className="input-dark w-full rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500" />
-            <p className="text-[11px] text-slate-500 mt-1.5">Must be at least 6 characters</p>
+            <div className="relative">
+              <input type={showPassword ? "text" : "password"} value={pass} onChange={(e) => setPass(e.target.value)} required minLength={8} placeholder="8+ characters with letters & numbers"
+                className="input-dark w-full rounded-xl px-4 py-2.5 pr-10 text-sm text-white placeholder-slate-500" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition text-xs font-medium">
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1.5">Must be at least 8 characters with letters and numbers</p>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-400 mb-1.5 block">Confirm password</label>
+            <div className="relative">
+              <input type={showConfirmPassword ? "text" : "password"} value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} required minLength={8} placeholder="Re-enter password"
+                className="input-dark w-full rounded-xl px-4 py-2.5 pr-10 text-sm text-white placeholder-slate-500" />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition text-xs font-medium">
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           {err && (
@@ -53,8 +99,13 @@ export default function Register({ onLogin }: { onLogin: (t: string) => void }) 
             </p>
           )}
 
-          <button disabled={loading} className="btn-primary w-full text-white text-sm font-semibold py-3 rounded-xl">
-            {loading ? "Creating account…" : "Sign up"}
+          <button disabled={loading} className="btn-primary w-full text-white text-sm font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
+            {loading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Creating account…
+              </>
+            ) : "Sign up"}
           </button>
         </form>
 
