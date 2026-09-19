@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createHmac, randomBytes } from "crypto";
+import { existsSync } from "fs";
 import { listUsers, createUser, verifyCredentials, issueToken, verifyToken, revokeToken, publicUser, findUserByEmail, findUser, initStorage, read, write } from "./storage.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -239,13 +240,13 @@ app.get("/api/promo/shifu-bonus", (req, res) => {
   });
 });
 
-// Frontend
-app.use(express.static(DIST));
-app.get("*", (req, res, next) => {
-  if (req.path.startsWith("/api")) return next();
-  res.sendFile(path.join(DIST, "index.html"), (e) => {
-    if (e) res.status(200).send("Auther — build the frontend first");
+// Frontend - only serve static files if dist directory exists
+if (existsSync(DIST)) {
+  app.use(express.static(DIST));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api") || req.path.startsWith("/sso")) return next();
+    res.sendFile(path.join(DIST, "index.html"));
   });
-});
+}
 
 export default app;
