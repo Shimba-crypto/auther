@@ -1,1 +1,21 @@
-Nothing needs to be added to .gitignore since only a configuration file (`vercel.json`) was modified and no build artifacts, dependencies, or temporary files were detected in the changes.
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.vite/
+
+# Runtime data (JSON-file storage mode)
+data/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
